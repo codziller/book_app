@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://cors-anywhere.herokuapp.com/http://127.0.0.1:8000";
 class UserService {
   /********************Retrive current user from localstorage ********************/
   getCurrentUser() {
@@ -63,9 +63,6 @@ class UserService {
           return response;
         }
       });
-  }
-  getCurrentUser() {
-    return JSON.parse(localStorage.getItem("user"));
   }
 
   /***********************************Delete User Info********************/

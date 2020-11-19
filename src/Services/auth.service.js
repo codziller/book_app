@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://cors-anywhere.herokuapp.com/http://127.0.0.1:8000";
 class AuthService {
   /***********************************Register******************* */
   register(data) {
