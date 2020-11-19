@@ -212,7 +212,7 @@ const Register = () => {
 
             <Button
               type="submit"
-              className="mb-4"
+              className="mb-5 mt-4"
               color="success"
               size="sm"
               block

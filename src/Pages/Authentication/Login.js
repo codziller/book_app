@@ -151,6 +151,7 @@ const Login = () => {
             </FormGroup>
 
             <Button
+              className="mt-4"
               type="submit"
               color="success"
               size="sm"
