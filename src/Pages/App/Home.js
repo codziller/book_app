@@ -5,6 +5,7 @@ import Quiz from "./Quiz";
 import SearchBar from "../../Components/Searchbar";
 import Modal from "../../Components/Modal";
 import AppSelect from "../../Components/Select";
+import Toast from "../../Components/Toast";
 import AuthService from "../../Services/auth.service";
 import UserService from "../../Services/user.service";
 import ReactPaginate from "react-paginate";
@@ -53,6 +54,7 @@ export default class Home extends React.Component {
       selectedAnswer: {},
       correctAnswers: 0,
       showFinalModal: false,
+      showToast: false,
     };
   }
 
@@ -67,6 +69,7 @@ export default class Home extends React.Component {
         userName: auth.first_name + " " + auth.last_name,
       });
       await this.handleGetTournaments();
+      this.setState({ showToast: true });
     }
   }
 
@@ -722,6 +725,13 @@ export default class Home extends React.Component {
               </Form>
             )
           }
+        />
+        <Toast
+          toastClass={
+            (this.state.showToast && "hidden_toast third_toast") ||
+            "third_toast"
+          }
+          closeClick={() => this.setState({ showToast: false })}
         />
       </div>
     );

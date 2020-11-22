@@ -101,4 +101,51 @@ function Right(props) {
     </svg>
   );
 }
-export { Search, Ellipses, PasswordToggler, Left, Right };
+function CloseIcon(props) {
+  return (
+    <svg
+      className={props.className}
+      width={props.width}
+      height={props.height}
+      viewBox="0 0 26 26"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect
+        x="5.84375"
+        y="18.5693"
+        width="18"
+        height="2.25"
+        rx="1.125"
+        transform="rotate(-45 5.84375 18.5693)"
+        fill={props.fill}
+      />
+      <rect
+        x="7.43359"
+        y="5.84082"
+        width="18"
+        height="2.25"
+        rx="1.125"
+        transform="rotate(45 7.43359 5.84082)"
+        fill={props.fill}
+      />
+    </svg>
+  );
+}
+function Info(props) {
+  return (
+    <svg
+      fill={props.fill}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 128 128"
+      width={props.width}
+      height={props.width}
+    >
+      <path d="M64,122c32,0,58-26,58-58S96,6,64,6S6,32,6,64S32,122,64,122z M64,12c28.7,0,52,23.3,52,52s-23.3,52-52,52S12,92.7,12,64 S35.3,12,64,12z" />
+      <circle cx="64" cy="39" r="9" />
+      <path d="M64,101c5,0,9-4,9-9V68c0-5-4-9-9-9s-9,4-9,9v24C55,97,59,101,64,101z" />
+    </svg>
+  );
+}
+
+export { Search, Ellipses, PasswordToggler, Left, Right, CloseIcon, Info };

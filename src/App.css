@@ -348,6 +348,51 @@ html,
 .pagination > li:last-child > span {
   border-radius: unset;
 }
+/*************************************TOAST STYLE ********************************************/
+.toast_container {
+  position: fixed;
+  top: 88vh;
+  right: 0.3em;
+  z-index: 999;
+  height: 12em;
+  width: 20em;
+  display: flex;
+  padding: 1.2em 0.6em;
+  box-shadow: 0 0 0.2em #999;
+  border-radius: 0.14em;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(21em);
+}
+.hidden_toast {
+  transform: none !important;
+}
+.third_toast {
+  top: 64vh;
+}
+.up_toast {
+  top: 76vh;
+}
+.toast_container button {
+  background: none;
+  width: 10%;
+  height: fit-content;
+  align-items: center;
+  justify-content: center;
+  margin: -1.2em 0.1em auto auto;
+  border: none;
+}
+.toast_container h6 {
+  margin-top: 1em;
+  color: #ffffff;
+  margin-bottom: 0;
+  font-size: 0.9em;
+  font-weight: 300;
+  line-height: 1.3em;
+}
+.toast_container svg {
+  margin-right: 0.3em;
+}
+
 /* Media queries */
 @media only screen and (max-width: 767px) {
   .auth_form_container {
