@@ -354,7 +354,7 @@ html,
   top: 88vh;
   right: 0.3em;
   z-index: 999;
-  height: 12em;
+  height: fit-content;
   width: 20em;
   display: flex;
   padding: 1.2em 0.6em;
@@ -383,7 +383,7 @@ html,
   border-radius: 10px;
 }
 .toast_container h6 {
-  margin-top: 1em;
+  margin-top: 0.7em;
   color: #ffffff;
   margin-bottom: 0;
   font-size: 0.9em;
