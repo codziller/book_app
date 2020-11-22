@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "https://cors-anywhere.herokuapp.com/http://127.0.0.1:8000";
+const API_URL = "https://lori-backend.herokuapp.com";
 class UserService {
   /********************Retrive current user from localstorage ********************/
   getCurrentUser() {
@@ -31,12 +31,12 @@ class UserService {
       .get(
         API_URL + url,
 
-        {
-          headers: {
-            Authorization:
-              user && user.access_token ? `Bearer ${user.access_token}` : "",
-          },
-        },
+        // {
+        //   headers: {
+        //     Authorization:
+        //       user && user.access_token ? `Bearer ${user.access_token}` : "",
+        //   },
+        // },
         data
       )
       .then((response) => {

@@ -5,7 +5,6 @@ import Quiz from "./Quiz";
 import SearchBar from "../../Components/Searchbar";
 import Modal from "../../Components/Modal";
 import AppSelect from "../../Components/Select";
-import { Ellipses } from "../../Components/Icons";
 import AuthService from "../../Services/auth.service";
 import UserService from "../../Services/user.service";
 import ReactPaginate from "react-paginate";
@@ -23,27 +22,25 @@ export default class Home extends React.Component {
       showUpdateModal: false,
       tournament: "",
       category: "",
+      book: "",
       difficulty: "",
+      currentCategory: [],
       tournamentSuccess: true,
       first_nameSuccess: true,
       last_nameSuccess: true,
       categorySuccess: true,
       difficultySuccess: true,
       categoryOptions: [],
-      difficultyOptions: [
-        { value: "easy", label: "Easy" },
-        { value: "medium", label: "Medium" },
-        { value: "hard", label: "Hard" },
-      ],
-      tournamentList: [],
-      allTournamentList: [],
+      bookStoreList: [],
+      allbookStoreList: [],
+      bookOptions: [],
       offset: 0,
-      perPage: 3,
+      perPage: 100,
       currentPage: 0,
       pageLoading: false,
       categoryLoading: false,
       createLoading: false,
-      createText: "Create Tournament",
+      createText: "Borrow",
       updateText: "Update Tournament",
       deleteText: "Yes",
       createColor: "primary",
@@ -64,31 +61,30 @@ export default class Home extends React.Component {
     if (!auth) {
       this.props.history.push("/login");
     } else {
-      await this.handleGetTournaments();
       await this.handleGetCategoryOptions();
-      this.setState({
+      await this.setState({
         userId: auth.id,
         userName: auth.first_name + " " + auth.last_name,
       });
+      await this.handleGetTournaments();
     }
   }
 
   handleGetTournaments = async () => {
-    this.setState({ pageLoading: true });
-    await UserService.getInfo(null, "/api/quiz-tournaments/")
+    await UserService.getInfo(null, `/api/rented-books/${this.state.userId}`)
       .then(async (response) => {
         for (let i = 0; i < response.data.length; i++) {
-          response.data[i].show = false;
+          response.data[i].show = true;
         }
-
-        const slice = response.data.slice(
+        const slice = response.data["rented_books"].slice(
           this.state.offset,
           this.state.offset + this.state.perPage
         );
         this.setState({
           pageCount: Math.ceil(response.data.length / this.state.perPage),
-          tournamentList: slice,
-          allTournamentList: response.data,
+          bookStoreList: slice,
+          allbookStoreList: response.data["rented_books"],
+          total_fee: response.data["total_fee"],
         });
       })
       .catch((e) => {
@@ -110,8 +106,9 @@ export default class Home extends React.Component {
 
   handleGetCategoryOptions = async () => {
     this.setState({ categoryLoading: true });
-    await UserService.getInfo(null, "/api/poll-categories/")
+    await UserService.getInfo(null, "/api/category")
       .then(async (response) => {
+        this.setState({ currentCategory: response.data });
         for (let i = 0; i < response.data.length; i++) {
           this.setState((prevState) => ({
             categoryOptions: [
@@ -126,7 +123,7 @@ export default class Home extends React.Component {
                   response &&
                   response.data &&
                   response.data[i] &&
-                  response.data[i].category_name,
+                  response.data[i].name,
               },
             ],
           }));
@@ -151,7 +148,6 @@ export default class Home extends React.Component {
   handlePageClick = (e) => {
     const selectedPage = e.selected;
     const offset = selectedPage * this.state.perPage;
-
     this.setState(
       {
         currentPage: selectedPage,
@@ -164,15 +160,14 @@ export default class Home extends React.Component {
   };
 
   loadMoreData = () => {
-    const data = this.state.allTournamentList;
-
+    const data = this.state.allbookStoreList;
     const slice = data.slice(
       this.state.offset,
       this.state.offset + this.state.perPage
     );
     this.setState({
       pageCount: Math.ceil(data.length / this.state.perPage),
-      tournamentList: slice,
+      bookStoreList: slice,
     });
   };
 
@@ -183,19 +178,43 @@ export default class Home extends React.Component {
         tournamentSuccess: true,
         categorySuccess: true,
         difficultySuccess: true,
-        createText: "Create Tournament",
+        createText: "Borrow !",
         updateText: "Update Tournament",
         deleteText: "Yes",
         createColor: "primary",
       });
   };
   toggleActionData = (index, selected) => {
-    const values = [...this.state.tournamentList];
+    const values = [...this.state.bookStoreList];
     values[index][selected] = !values[index][selected];
     this.setState({ values });
   };
-  handleInputChange = (state, value) => {
-    this.setState({ [state]: value });
+  showBookSelect = () => {
+    let bookOptions = [];
+    for (
+      let i = 0;
+      i <
+      this.state.currentCategory[this.state.category - 1].book_category.length;
+      i++
+    ) {
+      bookOptions.push({
+        value:
+          this.state.currentCategory &&
+          this.state.currentCategory &&
+          this.state.currentCategory[this.state.category - 1].book_category[i]
+            .id,
+        label:
+          this.state.currentCategory &&
+          this.state.currentCategory[this.state.category - 1] &&
+          this.state.currentCategory[this.state.category - 1].book_category[i]
+            .name,
+      });
+    }
+    this.setState({ bookOptions });
+  };
+  handleInputChange = async (state, value, isCategory) => {
+    await this.setState({ [state]: value });
+    isCategory && this.showBookSelect();
   };
   handleSuccess = () => {
     this.setState((prevState) => ({
@@ -214,21 +233,15 @@ export default class Home extends React.Component {
   handleCreateTournament = async (e) => {
     e.preventDefault();
 
-    if (
-      this.state.tournament === "" ||
-      this.state.category === "" ||
-      this.state.difficulty === ""
-    ) {
+    if (this.state.book === "") {
       this.handleSuccess();
     } else {
       this.setState({ createLoading: true });
       var bodyParameters = {
-        difficulty: this.state.difficulty,
-        category: this.state.category,
-        name: this.state.tournament,
-        user: this.state.userId,
+        book: this.state.book,
+        customer: this.state.userId,
       };
-      await UserService.formSubmit(bodyParameters, "/api/quiz-tournaments/")
+      await UserService.formSubmit(bodyParameters, "/api/lend-book/")
         .then(async () => {
           this.setState({
             createText: "Created",
@@ -253,8 +266,7 @@ export default class Home extends React.Component {
           });
           const err =
             error && (error.response || error.message || error.toString());
-
-          this.setState({ createError: err.data });
+          this.setState({ createError: err.data.error[0] });
         })
         .finally(async () => {
           await this.handleGetTournaments();
@@ -281,7 +293,7 @@ export default class Home extends React.Component {
       };
       await UserService.formPatch(
         bodyParameters,
-        `/api/quiz-tournaments/${this.state.currentTournament.id}/`
+        `/api/quiz-tournaments/${this.state.currentTournament.id}`
       )
         .then(async () => {
           this.setState({
@@ -316,40 +328,6 @@ export default class Home extends React.Component {
     }
   };
 
-  handleDeleteTournament = async () => {
-    this.setState({ pageLoading: true, deleteText: "Deleting" });
-
-    await UserService.deleteInfo(
-      `/api/quiz-tournaments/${this.state.currentTournament.id}/`
-    )
-      .then(async () => {
-        this.setState({
-          deleteText: "Deleted",
-        });
-      })
-      .catch((error) => {
-        if (
-          (error && error.response && error.response.status === 401) ||
-          (error && error.response && error.response.status === 404) ||
-          (error && error.response && error.response.status === 403) ||
-          (error && error.response && error.response.status === 503)
-        ) {
-          this.props.history.push("/login");
-          AuthService.logout();
-        }
-        this.setState({
-          deleteText: "Error",
-          pageLoading: false,
-        });
-        const err =
-          error && (error.response || error.message || error.toString());
-
-        this.setState({ createError: err.data });
-      })
-      .finally(async () => {
-        await this.handleGetTournaments();
-      });
-  };
   renderViews = (name) => {
     switch (name) {
       case "showTournaments":
@@ -377,40 +355,14 @@ export default class Home extends React.Component {
         });
     }
   };
-  handleAnswerSelect = (item) => {
-    this.setState({ selectedOption: item });
-  };
-  handleNext = () => {
-    if (this.state.currentQuestion <= 9) {
-      this.setState({ currentQuestion: this.state.currentQuestion + 1 });
 
-      if (this.state.selectedAnswer.correct_answer) {
-        this.setState({ correctAnswers: this.state.correctAnswers + 1 });
-      }
-      this.setState({ selectedAnswer: {}, selectedOption: "" });
-    } else {
-      return;
-    }
-  };
-
-  finishQuiz = () => {
-    this.setState({ showFinalModal: !this.state.showFinalModal });
-    this.setState({
-      currentQuestion: 0,
-      correctAnswers: 0,
-      selectedOption: "",
-      selectedAnswer: {},
-    });
-    this.renderViews("showTournaments");
-  };
   render() {
     const {
       userName,
       isOpen,
       showCreateModal,
-      tournamentList,
+      bookStoreList,
       categoryOptions,
-      difficultyOptions,
       showTournaments,
       showQuiz,
       currentTournament,
@@ -456,7 +408,7 @@ export default class Home extends React.Component {
                 <span style={{ fontWeight: "bold", marginRight: "5px" }}>
                   +
                 </span>
-                <h6>Create Tournament</h6>
+                <h6>Borrow new book!</h6>
               </Button>
               <SearchBar
                 value={this.state.searchQuery}
@@ -465,137 +417,65 @@ export default class Home extends React.Component {
                 }
               />
             </div>
+            <h5 style={{ color: "lightblue" }}>
+              <center>Hi, {this.state.userName}</center>
+            </h5>
+            <h5 style={{ color: "lightblue" }}>
+              <center>
+                Your total outstanding charge is: ${this.state.total_fee}
+              </center>
+            </h5>
+            <h6 className="table_container-text">
+              <center>BOOKS YOU BORROWED</center>
+            </h6>
             <div className="table_container">
               <Table hover responsive>
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Creator</th>
-                    <th>Tournament Name</th>
+                    <th>Book Name</th>
                     <th>Category</th>
-                    <th>Difficulty</th>
-                    <th>Actions</th>
+                    <th>Date Borrowed</th>
+                    <th>Unit Charge</th>
+                    <th>Accumulated Charge</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tournamentList
+                  {bookStoreList
                     .filter((item) => {
                       if (this.state.searchQuery === "") {
                         return item;
                       } else if (
                         `${
-                          item &&
-                          item.creator &&
-                          item.creator.first_name.toLowerCase() +
-                            " " +
-                            item.creator.last_name.toLowerCase()
+                          item && item.book && item.book.name.toLowerCase()
                         }`.includes(this.state.searchQuery.toLowerCase()) ||
                         (item &&
-                          item.category &&
-                          item.category.category_name
+                          item.book.category &&
+                          item.book.category.name
                             .toLowerCase()
-                            .includes(this.state.searchQuery.toLowerCase())) ||
-                        item.name
-                          .toLowerCase()
-                          .includes(this.state.searchQuery.toLowerCase()) ||
-                        item.difficulty
-                          .toLowerCase()
-                          .includes(this.state.searchQuery.toLowerCase())
+                            .includes(this.state.searchQuery.toLowerCase()))
                       ) {
                         return item;
                       }
+                      return true;
                     })
 
                     .map((item, i) => {
                       return (
                         <tr key={"tournament" + i}>
-                          <th scope="row">{item.id}</th>
-                          <td>
-                            {item &&
-                              item.creator &&
-                              item.creator.first_name +
-                                " " +
-                                item.creator.last_name}
-                          </td>
-                          <td>{item.name}</td>
-                          <td>
-                            {item &&
-                              item.category &&
-                              item.category.category_name}
-                          </td>
-                          <td>{item.difficulty}</td>
-                          <td className="table_actions">
-                            <Ellipses
-                              width="0.8em"
-                              height="0.8em"
-                              fill="#17a3b83a"
-                              className="ellipses"
-                              onClick={() => this.toggleActionData(i, "show")}
-                            />
-                            {item.show && (
-                              <div className="action_modal">
-                                <h6
-                                  onClick={() =>
-                                    this.toggleActionData(i, "show")
-                                  }
-                                >
-                                  x
-                                </h6>
-                                <button
-                                  onClick={async () => {
-                                    await this.setState({
-                                      currentTournament: item,
-                                    });
-                                    this.renderViews("showQuiz");
-                                  }}
-                                >
-                                  Open Tournament
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    await this.setState({
-                                      modalType: "update",
-                                      currentTournament: item,
-                                      tournament: item.name,
-                                      category: item.category.id,
-                                      difficulty: item.difficulty,
-                                    });
-                                    this.toggle(
-                                      "showCreateModal",
-                                      !this.state.showCreateModal,
-                                      true
-                                    );
-                                  }}
-                                >
-                                  Update Tournament
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    await this.setState({
-                                      modalType: "delete",
-                                      currentTournament: item,
-                                    });
-                                    this.toggle(
-                                      "showCreateModal",
-                                      !this.state.showCreateModal,
-                                      true
-                                    );
-                                  }}
-                                >
-                                  Delete Tournament
-                                </button>
-                              </div>
-                            )}
-                          </td>
+                          <th scope="row">{item.book.name}</th>
+                          <td>{item.book.category.name}</td>
+                          <td>{item.date_logged.slice(0, 10)}</td>
+                          <td>${item.book.category.price.toFixed(1)}</td>
+                          <td>${item.rental_charge.toFixed(1)}</td>
                         </tr>
                       );
                     })}
                 </tbody>
               </Table>
-              {tournamentList.length !== 0 && (
+              {bookStoreList.length !== 0 && (
                 <ReactPaginate
-                  previousLabel={"previous"}
-                  nextLabel={"next"}
+                  previousLabel={"Previous"}
+                  nextLabel={"Next"}
                   breakLabel={"..."}
                   breakClassName={"break-me"}
                   pageCount={this.state.pageCount}
@@ -620,6 +500,7 @@ export default class Home extends React.Component {
                 if (i === currentQuestion) {
                   return <h6 key={"question" + i}>{item.question_text}</h6>;
                 }
+                return true;
               })
             }
             options={
@@ -724,7 +605,7 @@ export default class Home extends React.Component {
           title={
             (modalType === "update" && "Update Quiz Tournament") ||
             (modalType === "delete" && "Delete Tournament") ||
-            "Create Quiz Tournament"
+            "Borrow a Book"
           }
           showHeader={true}
           body={
@@ -787,43 +668,6 @@ export default class Home extends React.Component {
                   }
                   style={{ textTransform: "capitalize" }}
                 />
-                <Input
-                  type="name"
-                  placeholder="Enter tournament name"
-                  className={
-                    (this.state.categorySuccess && "mb-3") || "mb-3 error_input"
-                  }
-                  value={this.state.tournament}
-                  onChange={(e) =>
-                    this.handleInputChange("tournament", e.target.value)
-                  }
-                  onFocus={() => this.handleFocus("tournamentSuccess")}
-                />
-                {/* <Input
-                type="name"
-                placeholder="Enter creator's first name"
-                className={
-                  (this.state.first_nameSuccess && "mb-3") || "mb-3 error_input"
-                }
-                value={this.state.first_name}
-                onChange={(e) =>
-                  this.handleInputChange("first_name", e.target.value)
-                }
-                onFocus={() => this.handleFocus("first_nameSuccess")}
-              />
-              <Input
-                type="name"
-                placeholder="Enter creator's last name"
-                className={
-                  (this.state.last_nameSuccess && "mb-3") || "mb-3 error_input"
-                }
-                value={this.state.last_name}
-                onChange={(e) =>
-                  this.handleInputChange("last_name", e.target.value)
-                }
-                onFocus={() => this.handleFocus("last_nameSuccess")}
-              /> */}
-
                 <AppSelect
                   defaultInputValue={
                     (modalType === "update" &&
@@ -833,7 +677,7 @@ export default class Home extends React.Component {
                   placeholder="Select Category"
                   options={categoryOptions}
                   handleChange={(e) =>
-                    this.handleInputChange("category", e.value)
+                    this.handleInputChange("category", e.value, true)
                   }
                   onFocus={() => this.handleFocus("categorySuccess")}
                   className={
@@ -841,22 +685,25 @@ export default class Home extends React.Component {
                     "error_select"
                   }
                 />
-                <AppSelect
-                  defaultInputValue={
-                    (modalType === "update" && currentTournament.difficulty) ||
-                    ""
-                  }
-                  placeholder="Select Difficulty"
-                  options={difficultyOptions}
-                  handleChange={(e) =>
-                    this.handleInputChange("difficulty", e.value)
-                  }
-                  onFocus={() => this.handleFocus("difficultySuccess")}
-                  className={
-                    (this.state.difficultySuccess && "sucess_select") ||
-                    "error_select"
-                  }
-                />
+                {this.state.category && (
+                  <AppSelect
+                    defaultInputValue={
+                      (modalType === "update" &&
+                        currentTournament.difficulty) ||
+                      ""
+                    }
+                    placeholder="Choose Books"
+                    options={this.state.bookOptions}
+                    handleChange={(e) =>
+                      this.handleInputChange("book", e.value)
+                    }
+                    onFocus={() => this.handleFocus("difficultySuccess")}
+                    className={
+                      (this.state.difficultySuccess && "sucess_select") ||
+                      "error_select"
+                    }
+                  />
+                )}
 
                 <Button
                   type="submit"
@@ -880,3 +727,5 @@ export default class Home extends React.Component {
     );
   }
 }
+
+// export default withRouter(Home);

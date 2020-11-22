@@ -14,7 +14,7 @@ function NavBar({ isOpen, toggleClick, navClick, navigation, color }) {
   return (
     <Navbar color="info" light expand="md" className="mb-3">
       <NavbarBrand href="/">
-        Quiz App <Logo />
+        LORI BOOK STORE <Logo />
       </NavbarBrand>
       <NavbarToggler onClick={toggleClick} />
       <Collapse isOpen={isOpen} navbar>

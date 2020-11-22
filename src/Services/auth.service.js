@@ -1,9 +1,10 @@
 import axios from "axios";
-const API_URL = "https://cors-anywhere.herokuapp.com/http://127.0.0.1:8000";
+const API_URL = "https://lori-backend.herokuapp.com";
+//const API_URL = "http://127.0.0.1:8000/";
 class AuthService {
   /***********************************Register******************* */
   register(data) {
-    return axios.post(API_URL + "/api/user/", data).then((response) => {
+    return axios.post(API_URL + "/api/customer/", data).then((response) => {
       if (response) {
       }
 
@@ -20,7 +21,7 @@ class AuthService {
         },
       })
       .then((response) => {
-        if (response && response.data && response.data.access_token) {
+        if (response) {
           localStorage.setItem("user", JSON.stringify(response.data));
         }
 

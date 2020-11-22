@@ -86,7 +86,7 @@ const Login = () => {
           <div className="backdrop">
             <div className="form_left_text">
               <h1 className="text-white">Welcome Back!</h1>
-              <h6 className="text-white normal_text">Ready for some quiz ?</h6>
+              <h6 className="text-white normal_text">A room without books is like a body without soul!</h6>
               <h6 className="text-white tiny_text mt-4">
                 Don't have an account? Register
               </h6>
@@ -98,7 +98,7 @@ const Login = () => {
             </div>
           </div>
         </div>
-        <div style={{ width: "100%" }}>
+        <div style={{ width: "100%", "marginBottom":"2em" }}>
           <Form className="auth_form" onSubmit={handleLogin}>
             <h1 className="title_text">Login</h1>
             <h6 className="error_text" style={{ height: "16px" }}>
@@ -161,8 +161,6 @@ const Login = () => {
               Login
               {loading && <Spinner color="light" size="sm" className="ml-1" />}
             </Button>
-
-            <h6 className="tiny_text mt-2 mb-5">Change password</h6>
           </Form>
         </div>
       </div>
