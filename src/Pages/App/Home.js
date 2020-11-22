@@ -9,7 +9,8 @@ import Toast from "../../Components/Toast";
 import AuthService from "../../Services/auth.service";
 import UserService from "../../Services/user.service";
 import ReactPaginate from "react-paginate";
-export default class Home extends React.Component {
+import { withRouter } from "react-router-dom";
+class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -738,4 +739,4 @@ export default class Home extends React.Component {
   }
 }
 
-// export default withRouter(Home);
+export default withRouter(Home);

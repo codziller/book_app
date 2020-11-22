@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "https://lori-backend.herokuapp.com/";
+const API_URL = "https://lori-backend.herokuapp.com";
 class UserService {
   /********************Retrive current user from localstorage ********************/
   getCurrentUser() {
