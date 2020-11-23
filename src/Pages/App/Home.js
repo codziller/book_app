@@ -430,7 +430,11 @@ class Home extends React.Component {
               </center>
             </h5>
             <h6 className="table_container-text">
-              <center>BOOKS YOU BORROWED</center>
+              <center>
+                BOOKS YOU BORROWED (Books are collected at least one day after
+                borrowed day)
+              </center>
+              <center></center>
             </h6>
             <div className="table_container">
               <Table hover responsive>
