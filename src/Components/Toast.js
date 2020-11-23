@@ -13,7 +13,7 @@ const Toast = ({ toastClass, closeClick }) => (
         ## PRICING
       </h5>
       <h6>
-        1. Regular Books - $1 for 1st 2 days and $1.5 after (minimuum charge is
+        1. Regular Books - $1 for 1st 2 days and $1.5 after (minimum charge is
         $2)
       </h6>
 
