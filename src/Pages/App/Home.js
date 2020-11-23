@@ -64,13 +64,14 @@ class Home extends React.Component {
     if (!auth) {
       this.props.history.push("/login");
     } else {
+      this.setState({ pageLoading: true });
       await this.handleGetCategoryOptions();
       await this.setState({
         userId: auth.id,
         userName: auth.first_name + " " + auth.last_name,
       });
       await this.handleGetTournaments();
-      this.setState({ showToast: true });
+      this.setState({ showToast: true, pageLoading: false });
     }
   }
 
@@ -375,6 +376,7 @@ class Home extends React.Component {
 
       correctAnswers,
       modalType,
+      pageLoading,
     } = this.state;
     return (
       <div className="home_page_container">
@@ -430,13 +432,15 @@ class Home extends React.Component {
               </center>
             </h5>
             <h6 className="table_container-text">
-              <center>
-                BOOKS YOU BORROWED (Books are collected at least one day after
-                borrowed day)
-              </center>
+              <center>BOOKS YOU BORROWED</center>
               <center></center>
             </h6>
             <div className="table_container">
+              <div style={{ textAlign: "center", color: "#FF9C7F" }}>
+                {!pageLoading &&
+                  bookStoreList.length == 0 &&
+                  'You have no book, hit the "borrow" button to add books'}
+              </div>
               <Table hover responsive>
                 <thead>
                   <tr>
@@ -447,6 +451,7 @@ class Home extends React.Component {
                     <th>Accumulated Charge</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {bookStoreList
                     .filter((item) => {
